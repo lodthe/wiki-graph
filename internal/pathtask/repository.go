@@ -14,6 +14,8 @@ var ErrNotFound = errors.New("not found")
 type Repository interface {
 	Create(from, to string) (*Task, error)
 	Get(id uuid.UUID) (*Task, error)
+	UpdateStatus(id uuid.UUID, oldStatus, newStatus Status) error
+	SetResult(id uuid.UUID, result *Result) error
 }
 
 type Repo struct {
@@ -55,4 +57,16 @@ func (r *Repo) Get(id uuid.UUID) (*Task, error) {
 	}
 
 	return task, nil
+}
+
+func (r *Repo) UpdateStatus(id uuid.UUID, oldStatus, newStatus Status) error {
+	_, err := r.db.Exec(`UPDATE "tasks" SET status = $1 WHERE id = $2 AND status = $3`, newStatus, id, oldStatus)
+
+	return err
+}
+
+func (r *Repo) SetResult(id uuid.UUID, result *Result) error {
+	_, err := r.db.Exec(`UPDATE "tasks" SET result = $1 WHERE id = $2`, result, id)
+
+	return err
 }
