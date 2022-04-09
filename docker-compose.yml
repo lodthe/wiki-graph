@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: wikigraph
+    volumes:
+      - postgres-data:/var/lib/postgresql/data/
+    ports:
+      - 50005:5432
+    restart: always
+
+volumes:
+  postgres-data:

@@ -1,0 +1,50 @@
+syntax = "proto3";
+package wikigraph;
+
+option go_package = "github.com/lodthe/wiki-graph/pkg/wikigraphpb";
+
+service WikiGraph {
+  // Enqueue a task to find the shortest path between two wikipedia pages.
+  rpc FindShortestPath(wikigraph.FindShortestPathRequest) returns (wikigraph.FindShortestPathResponse);
+
+  rpc GetTask(wikigraph.GetTaskRequest) returns (wikigraph.GetTaskResponse);
+}
+
+message TaskId {
+  string id = 1;
+}
+
+message Task {
+  enum Status {
+    UNKNOWN = 0;
+    PENDING = 1;
+    PROCESSING = 2;
+    DONE = 3;
+  }
+
+  TaskId id = 1;
+  Status status = 2;
+
+  string from_url = 3;
+  string to_url = 4;
+
+  // If the status is DONE, this is the shortest path, otherwise empty.
+  repeated string path = 5;
+}
+
+message FindShortestPathRequest {
+  string from_url = 1;
+  string to_url = 2;
+}
+
+message FindShortestPathResponse {
+  TaskId task_id = 1;
+}
+
+message GetTaskRequest {
+  TaskId task_id = 1;
+}
+
+message GetTaskResponse {
+  Task task = 1;
+}
