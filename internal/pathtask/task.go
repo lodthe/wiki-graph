@@ -22,8 +22,8 @@ type Task struct {
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
 
-	FromURL string `db:"from_url"`
-	ToURL   string `db:"to_url"`
+	From string `db:"from_page"`
+	To   string `db:"to_page"`
 
 	Status Status `db:"status"`
 

@@ -25,28 +25,28 @@ func New(repo pathtask.Repository) *Server {
 }
 
 func (s *Server) FindShortestPath(_ context.Context, in *wikigraphpb.FindShortestPathRequest) (*wikigraphpb.FindShortestPathResponse, error) {
-	if in.GetFromUrl() == "" {
-		return nil, status.Error(codes.InvalidArgument, "from_url is empty")
+	if in.GetFrom() == "" {
+		return nil, status.Error(codes.InvalidArgument, "from is empty")
 	}
 
-	if in.GetToUrl() == "" {
-		return nil, status.Error(codes.InvalidArgument, "to_url is empty")
+	if in.GetTo() == "" {
+		return nil, status.Error(codes.InvalidArgument, "to is empty")
 	}
 
-	task, err := s.repo.Create(in.GetFromUrl(), in.GetToUrl())
+	task, err := s.repo.Create(in.GetFrom(), in.GetTo())
 	if err != nil {
 		zlog.Error().Err(err).Fields(map[string]interface{}{
-			"from_url": in.GetFromUrl(),
-			"to_url":   in.GetToUrl(),
+			"from": in.GetFrom(),
+			"to":   in.GetTo(),
 		}).Msg("failed to create task")
 
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	zlog.Info().Fields(map[string]interface{}{
-		"id":       task.ID.String(),
-		"from_url": task.FromURL,
-		"to_url":   task.ToURL,
+		"id":   task.ID.String(),
+		"from": task.From,
+		"to":   task.To,
 	}).Msg("created a new task")
 
 	return &wikigraphpb.FindShortestPathResponse{
@@ -85,8 +85,8 @@ func (s *Server) taskToProto(task *pathtask.Task) *wikigraphpb.Task {
 		Id: &wikigraphpb.TaskId{
 			Id: task.ID.String(),
 		},
-		FromUrl: task.FromURL,
-		ToUrl:   task.ToURL,
+		From: task.From,
+		To:   task.To,
 	}
 	if task.Result != nil {
 		converted.Path = task.Result.ShortestPath

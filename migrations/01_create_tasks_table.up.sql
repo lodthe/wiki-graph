@@ -5,8 +5,8 @@ CREATE TABLE IF NOT EXISTS tasks (
       created_at timestamp without time zone default now() not null,
       updated_at timestamp without time zone default now() not null,
 
-      from_url varchar(512) not null,
-      to_url varchar(512) not null,
+      from_page varchar(512) not null,
+      to_page varchar(512) not null,
 
       status integer default 0 not null,
       result jsonb

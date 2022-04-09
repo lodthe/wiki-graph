@@ -29,13 +29,13 @@ func (r *Repo) Create(from, to string) (*Task, error) {
 		ID:        uuid.New(),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
-		FromURL:   from,
-		ToURL:     to,
+		From:      from,
+		To:        to,
 		Status:    StatusPending,
 	}
 
-	query := `INSERT INTO "tasks" (id, created_at, updated_at, from_url, to_url, status) 
-							VALUES (:id, :created_at, :updated_at, :from_url, :to_url, :status)`
+	query := `INSERT INTO "tasks" (id, created_at, updated_at, from_page, to_page, status) 
+							VALUES (:id, :created_at, :updated_at, :from_page, :to_page, :status)`
 	_, err := r.db.NamedExec(query, task)
 	if err != nil {
 		return nil, errors.Wrap(err, "database error")

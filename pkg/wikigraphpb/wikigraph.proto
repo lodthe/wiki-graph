@@ -25,16 +25,16 @@ message Task {
   TaskId id = 1;
   Status status = 2;
 
-  string from_url = 3;
-  string to_url = 4;
+  string from = 3;
+  string to = 4;
 
   // If the status is DONE, this is the shortest path, otherwise empty.
   repeated string path = 5;
 }
 
 message FindShortestPathRequest {
-  string from_url = 1;
-  string to_url = 2;
+  string from = 1;
+  string to = 2;
 }
 
 message FindShortestPathResponse {

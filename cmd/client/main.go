@@ -70,8 +70,8 @@ func processRequests(ctx context.Context, cli wikigraphpb.WikiGraphClient) {
 		fmt.Scanln(&to)
 
 		createTaskResponse, err := cli.FindShortestPath(ctx, &wikigraphpb.FindShortestPathRequest{
-			FromUrl: from,
-			ToUrl:   to,
+			From: from,
+			To:   to,
 		})
 		if err != nil {
 			fmt.Printf("[!] Failed to create a task: %v\n\n", err)
