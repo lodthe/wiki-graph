@@ -10,11 +10,13 @@ import (
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/jmoiron/sqlx"
 	"github.com/lodthe/wiki-graph/internal/pathtask"
+	"github.com/lodthe/wiki-graph/internal/taskqueue"
 	"github.com/lodthe/wiki-graph/internal/wikigraphserver"
 	"github.com/lodthe/wiki-graph/pkg/wikigraphpb"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 	zlog "github.com/rs/zerolog/log"
+	"github.com/wagslane/go-rabbitmq"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/reflection"
@@ -36,8 +38,19 @@ func main() {
 	}
 	defer db.Close()
 
+	publisher, err := rabbitmq.NewPublisher(
+		conf.AMQP.ConnectionURL,
+		rabbitmq.Config{},
+		rabbitmq.WithPublisherOptionsLogging,
+	)
+	if err != nil {
+		zlog.Fatal().Err(err).Msg("failed to connect to RabbitMQ")
+	}
+	defer publisher.Close()
+
 	repo := pathtask.NewRepository(db)
-	wikiGraphServer := wikigraphserver.New(repo)
+	producer := taskqueue.NewProducer(publisher, conf.AMQP.ExchangeName, conf.AMQP.RoutingKey)
+	wikiGraphServer := wikigraphserver.New(repo, producer)
 
 	srv, lis, err := registerServer(conf.GRPCServer, wikiGraphServer)
 	if err != nil {

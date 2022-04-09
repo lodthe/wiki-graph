@@ -10,6 +10,7 @@ import (
 type Config struct {
 	DB         DB
 	GRPCServer GRPCServer
+	AMQP       AMQP
 }
 
 type DB struct {
@@ -25,6 +26,13 @@ type GRPCServer struct {
 
 	Timeout   time.Duration `env:"GRPC_SERVER_TIMEOUT" envDefault:"10s"`
 	KeepAlive time.Duration `env:"GRPC_SERVER_KEEP_ALIVE" envDefault:"500ms"`
+}
+
+type AMQP struct {
+	ConnectionURL string `env:"AMQP_CONNECTION_URL" envDefault:"amqp://user:pass@localhost"`
+
+	ExchangeName string `env:"AMQP_EXCHANGE_NAME" envDefault:"wikigraph"`
+	RoutingKey   string `env:"AMQP_ROUTING_KEY" envDefault:"task"`
 }
 
 func ReadConfig() Config {

@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/lodthe/wiki-graph/internal/pathtask"
+	"github.com/lodthe/wiki-graph/internal/taskqueue"
 	"github.com/lodthe/wiki-graph/pkg/wikigraphpb"
 	"github.com/pkg/errors"
 	zlog "github.com/rs/zerolog/log"
@@ -15,12 +16,14 @@ import (
 type Server struct {
 	wikigraphpb.UnimplementedWikiGraphServer
 
-	repo pathtask.Repository
+	repo     pathtask.Repository
+	producer *taskqueue.Producer
 }
 
-func New(repo pathtask.Repository) *Server {
+func New(repo pathtask.Repository, producer *taskqueue.Producer) *Server {
 	return &Server{
-		repo: repo,
+		repo:     repo,
+		producer: producer,
 	}
 }
 
@@ -48,6 +51,12 @@ func (s *Server) FindShortestPath(_ context.Context, in *wikigraphpb.FindShortes
 		"from": task.From,
 		"to":   task.To,
 	}).Msg("created a new task")
+
+	err = s.producer.Produce(taskqueue.Task{ID: task.ID})
+	if err != nil {
+		zlog.Error().Err(err).Str("id", task.ID.String()).Msg("failed to publish")
+		return nil, status.Error(codes.Internal, errors.Wrap(err, "failed to enqueue the task").Error())
+	}
 
 	return &wikigraphpb.FindShortestPathResponse{
 		TaskId: &wikigraphpb.TaskId{
