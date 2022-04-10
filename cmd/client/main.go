@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"os"
@@ -53,6 +54,8 @@ func createConnection(cfg GRPCServer) (*grpc.ClientConn, error) {
 }
 
 func processRequests(ctx context.Context, cli wikigraphpb.WikiGraphClient) {
+	reader := bufio.NewReader(os.Stdin)
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -61,13 +64,13 @@ func processRequests(ctx context.Context, cli wikigraphpb.WikiGraphClient) {
 		default:
 		}
 
-		var from string
-		fmt.Println("Enter the URL of the page you want to start from:")
-		fmt.Scanln(&from)
+		fmt.Println("Enter the title of the page you want to start from:")
+		from, _ := reader.ReadString('\n')
+		from = from[:len(from)-1]
 
-		var to string
-		fmt.Println("Enter the URL of the page you want to end at:")
-		fmt.Scanln(&to)
+		fmt.Println("Enter the title of the page you want to end at:")
+		to, _ := reader.ReadString('\n')
+		to = to[:len(to)-1]
 
 		createTaskResponse, err := cli.FindShortestPath(ctx, &wikigraphpb.FindShortestPathRequest{
 			From: from,
@@ -105,6 +108,10 @@ func processRequests(ctx context.Context, cli wikigraphpb.WikiGraphClient) {
 		fmt.Printf("The shortest path:\n")
 		for _, url := range task.GetPath() {
 			fmt.Printf("%s\n", url)
+		}
+
+		if len(task.GetPath()) == 0 {
+			fmt.Printf("Unfortunately, the path was not found. Probably, the path is too long or you have typos in the provided page titles.\nTry Apple and Fruits as an example.")
 		}
 
 		fmt.Println()
