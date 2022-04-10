@@ -42,7 +42,6 @@ func main() {
 func createConnection(cfg GRPCServer) (*grpc.ClientConn, error) {
 	conn, err := grpc.Dial(
 		cfg.Address,
-		grpc.WithBlock(),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithUnaryInterceptor(grpc_retry.UnaryClientInterceptor(
 			grpc_retry.WithMax(cfg.MaxRetries),
