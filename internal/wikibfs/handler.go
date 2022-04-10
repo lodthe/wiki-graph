@@ -3,17 +3,22 @@ package wikibfs
 import (
 	"github.com/google/uuid"
 	"github.com/lodthe/wiki-graph/internal/pathtask"
+	"github.com/lodthe/wiki-graph/pkg/wikiclient"
 	"github.com/pkg/errors"
 	zlog "github.com/rs/zerolog/log"
 )
 
 type Handler struct {
 	repository pathtask.Repository
+	wikiClient *wikiclient.Client
+	bfsConfig  BFSConfig
 }
 
-func NewHandler(repo pathtask.Repository) *Handler {
+func NewHandler(repo pathtask.Repository, wiki *wikiclient.Client, config BFSConfig) *Handler {
 	return &Handler{
 		repository: repo,
+		wikiClient: wiki,
+		bfsConfig:  config,
 	}
 }
 
@@ -37,7 +42,7 @@ func (h *Handler) HandleTask(taskID uuid.UUID) error {
 		return errors.Wrap(err, "failed to update status")
 	}
 
-	algo := newAlgorithm()
+	algo := newAlgorithm(h.wikiClient, h.bfsConfig)
 	path, err := algo.findShortestPath(task.ID, task.From, task.To)
 	if err != nil {
 		zlog.Error().Err(err).Str("id", taskID.String()).Msg("algorithm failed")

@@ -12,6 +12,7 @@ import (
 	"github.com/lodthe/wiki-graph/internal/pathtask"
 	"github.com/lodthe/wiki-graph/internal/taskqueue"
 	"github.com/lodthe/wiki-graph/internal/wikibfs"
+	"github.com/lodthe/wiki-graph/pkg/wikiclient"
 	"github.com/rs/zerolog"
 	zlog "github.com/rs/zerolog/log"
 	"github.com/wagslane/go-rabbitmq"
@@ -36,7 +37,6 @@ func main() {
 	rabbitConsumer, err := rabbitmq.NewConsumer(
 		conf.AMQP.ConnectionURL,
 		rabbitmq.Config{},
-		rabbitmq.WithConsumerOptionsLogging,
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -44,8 +44,13 @@ func main() {
 	defer rabbitConsumer.Close()
 
 	repo := pathtask.NewRepository(db)
+	wikiClient := wikiclient.New(conf.WikiAPI.ApiURL, conf.WikiAPI.MaxRPS)
+	handler := wikibfs.NewHandler(repo, wikiClient, wikibfs.BFSConfig{
+		DistanceThreshold: conf.Algorithm.DistanceThreshold,
+		WorkerCount:       conf.Algorithm.WorkerCount,
+	})
+
 	consumer := taskqueue.NewConsumer(rabbitConsumer, conf.AMQP.QueueName, conf.AMQP.RoutingKey)
-	handler := wikibfs.NewHandler(repo)
 
 	go func() {
 		err := consumer.StartConsuming(handler.HandleTask)

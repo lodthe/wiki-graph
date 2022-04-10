@@ -8,8 +8,10 @@ import (
 )
 
 type Config struct {
-	DB   DB
-	AMQP AMQP
+	DB        DB
+	AMQP      AMQP
+	WikiAPI   WikiAPI
+	Algorithm Algorithm
 }
 
 type DB struct {
@@ -25,6 +27,16 @@ type AMQP struct {
 
 	QueueName  string `env:"AMQP_QUEUE_NAME" envDefault:"wikigraph_tasks"`
 	RoutingKey string `env:"AMQP_ROUTING_KEY" envDefault:"task"`
+}
+
+type WikiAPI struct {
+	ApiURL string `env:"WIKIPEDIA_API_URL" envDefault:"https://en.wikipedia.org/w/api.php"`
+	MaxRPS int    `env:"WIKIPEDIA_API_RPS" envDefault:"50"`
+}
+
+type Algorithm struct {
+	DistanceThreshold uint `env:"BSF_DISTANCE_THRESHOLD" envDefault:"2"`
+	WorkerCount       int  `env:"BFS_WORKER_COUNT" envDefault:"100"`
 }
 
 func ReadConfig() Config {
