@@ -24,6 +24,18 @@ services:
     volumes:
       - 'rabbitmq-data:/bitnami'
 
+  server:
+    image: 'lodthe/wikigraph-server'
+    env_file: envfiles/.env.server
+    restart: unless-stopped
+    ports:
+      - '9000:9000'
+
+  worker:
+    image: 'lodthe/wikigraph-worker'
+    env_file: envfiles/.env.worker
+    restart: unless-stopped
+
 volumes:
   postgres-data:
   rabbitmq-data:

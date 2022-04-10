@@ -14,7 +14,7 @@ type Config struct {
 }
 
 type DB struct {
-	PostgresDSN string `env:"DB_POSTGRES_DSN,required" envDefault:"host=localhost port=5435 user=user password=password dbname=mafiagraph sslmode=disable"`
+	PostgresDSN string `env:"DB_POSTGRES_DSN,required" envDefault:"host=localhost port=5432 user=user password=password dbname=wikigraph sslmode=disable"`
 
 	MaxOpenConnections    int           `env:"DB_MAX_OPEN_CONNECTIONS" envDefault:"10"`
 	MaxIdleConnections    int           `env:"DB_MAX_IDLE_CONNECTIONS" envDefault:"5"`
